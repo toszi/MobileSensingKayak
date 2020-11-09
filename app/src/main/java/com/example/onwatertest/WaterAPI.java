@@ -34,24 +34,19 @@ import com.google.android.gms.location.LocationServices;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class WaterAPI extends AppCompatActivity {
     Context c;
     JSONObject responseObject;
     FusedLocationProviderClient mLocationProvider;
-    EditText latText;
-    EditText longText;
-    Double latitude = null;
-    Double longitude = null;
-    LocationManager locationManager;
+
     private LocationCallback locationCallback;
 
     public WaterAPI(Context context) {
-    this.c = context;
+        this.c = context;
     }
-
-
 
     public void onWater(TextView status, EditText latInput, EditText longInput) {
         // Use current location.
@@ -63,8 +58,8 @@ public class WaterAPI extends AppCompatActivity {
         }
 
         LocationRequest mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(1000);
-        mLocationRequest.setFastestInterval(1 * 1000);
+        mLocationRequest.setInterval(5000);
+        mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         LocationCallback mLocationCallback = new LocationCallback() {
             @Override
@@ -75,84 +70,75 @@ public class WaterAPI extends AppCompatActivity {
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
                         //TODO: UI updates.
+                        System.out.println("Longitude callback: " + location.getLongitude());
+                        System.out.println("Latitude callback: " + location.getLatitude());
+                        System.out.println("LocationResults.getLocations() length: " + locationResult.getLocations().size());
+                        isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
                     }
                 }
             }
         };
 
         mLocationProvider.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+        /*
         mLocationProvider.getLastLocation().addOnSuccessListener((Activity) this.c, location -> {
             if(location != null) {
-                this.latitude = location.getLatitude();
-                this.longitude = location.getLongitude();
+                //this.latitude = location.getLatitude();
+                //this.longitude = location.getLongitude();
               //  System.out.println(latitude);
                // System.out.println(longitude);
+                System.out.println("mLocationProvider addOnSuccessListener");
             }
 
         }).addOnFailureListener(e -> {
             System.out.println("Failed to retrieve location!");
         });
+        */
+    }
 
-
+    private void isOnWaterRequest(TextView status, Double longitude, Double latitude){
         RequestQueue queue = Volley.newRequestQueue(this.c);
         String url = "";
         if(longitude != null && latitude != null) {
             url = "https://api.onwater.io/api/v1/results/" + latitude.toString() + "," + longitude.toString() + "?access_token=kZPaDPUNtsx_oTz6y8Mg";
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        try {
-                           responseObject = new JSONObject(response);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            if (responseObject.getString("water").equals("true")) {
-                               status.setText("Response is: You are on water!");
-                            } else if (responseObject.getString("water").equals("false")) {
-                                status.setText("Response is: You are not on water!");
+            // Request a string response from the provided URL.
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // Display the first 500 characters of the response string.
+                            try {
+                                responseObject = new JSONObject(response);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
+                            try {
+                                if (responseObject.getString("water").equals("true")) {
+                                    status.setText("Response is: You are on water!");
+                                } else if (responseObject.getString("water").equals("false")) {
+                                    status.setText("Response is: You are not on water!");
+                                }
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
 
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                status.setText("That didn't work!");
-                System.out.println(latitude);
-                System.out.println(longitude);
-            }
-
-        });
-
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    System.out.println("New location");
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    status.setText("That didn't work!");
+                    System.out.println(latitude);
+                    System.out.println(longitude);
                 }
-                for (Location location : locationResult.getLocations()) {
-                    // Update UI with location data
-                    // ...
-                }
-            }
-        };
+
+            });
+
             // Add the request to the RequestQueue.
             queue.add(stringRequest);
         } else {
-        status.setText("Unable to retrieve location!");
+            status.setText("Unable to retrieve location!");
         }
-
-
-
     }
-
-
 
 }
