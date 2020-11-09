@@ -34,6 +34,7 @@ import com.google.android.gms.location.LocationServices;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,6 +42,7 @@ public class WaterAPI extends AppCompatActivity {
     Context c;
     JSONObject responseObject;
     FusedLocationProviderClient mLocationProvider;
+    ArrayList<Location> locations = new ArrayList<Location>();
 
     private LocationCallback locationCallback;
 
@@ -69,12 +71,29 @@ public class WaterAPI extends AppCompatActivity {
                 }
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
-                        //TODO: UI updates.
-                        System.out.println("Longitude callback: " + location.getLongitude());
-                        System.out.println("Latitude callback: " + location.getLatitude());
-                        System.out.println("LocationResults.getLocations() length: " + locationResult.getLocations().size());
-                        isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                        if(locations.size() == 0) {
+                            Location l = new Location("Location");
+                            l.setLatitude(location.getLatitude());
+                            l.setLongitude(location.getLongitude());
+                            locations.add(l);
+                        }
+                        // if locations array size is not 0 and the previous location is not the same, then we add it to the array.
+                        if (locations.size() != 0 && locations.get(locations.size() - 1).getLatitude() != location.getLatitude() && locations.get(locations.size() - 1).getLongitude() != location.getLongitude()) {
+                            Location l = new Location("Location");
+                            l.setLatitude(location.getLatitude());
+                            l.setLongitude(location.getLongitude());
+                            locations.add(l);
+                        }
+                        System.out.println("Current Location: " + location.getLatitude() + " " + location.getLongitude());
+                        System.out.println("Last Array Location: " + locations.get(locations.size() - 1).getLatitude() + " " + locations.get(locations.size() - 1).getLongitude());
                     }
+                 //  System.out.println("Longitude callback: " + location.getLongitude());
+                   // System.out.println("Latitude callback: " + location.getLatitude());
+                   // System.out.println("LocationResults.getLocations() length: " + locationResult.getLocations().size());
+                    // System.out.println(locations.size());
+                    System.out.println(locations.size());
+                    isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+
                 }
             }
         };
@@ -118,12 +137,10 @@ public class WaterAPI extends AppCompatActivity {
                                 } else if (responseObject.getString("water").equals("false")) {
                                     status.setText("Response is: You are not on water!");
                                 }
-
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
-
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
