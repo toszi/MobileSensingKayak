@@ -63,14 +63,17 @@ public class WaterAPI extends AppCompatActivity {
         mLocationRequest.setInterval(5000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        //Make a request for the location manager
         LocationCallback mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult == null) {
                     return;
                 }
+                //size of locationResults.getLocations() will always be 1
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
+                        //if the app has just been started, add the current location to the arraylist
                         if(locations.size() == 0) {
                             Location l = new Location("Location");
                             l.setLatitude(location.getLatitude());
