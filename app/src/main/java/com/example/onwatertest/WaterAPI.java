@@ -1,21 +1,13 @@
 package com.example.onwatertest;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -34,9 +26,9 @@ import com.google.android.gms.location.LocationServices;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class WaterAPI extends AppCompatActivity {
     Context c;
@@ -81,39 +73,36 @@ public class WaterAPI extends AppCompatActivity {
                         //if the app has just been started, add the current location to the arraylist
                         if(locations.size() == 0) {
                             Location l = new Location("Location");
-                            l.setLatitude(location.getLatitude());
-                            l.setLongitude(location.getLongitude());
+                            l.setLatitude(round(location.getLatitude(), 5));
+                            l.setLongitude(round(location.getLongitude(),5));
                             l.setTime(location.getTime());
                             locations.add(l);
                         }
                         // if locations array size is not 0 and the previous location is not the same, then we add it to the array.
-                        if (locations.size() != 0 && locations.get(locations.size() - 1).getLatitude() != location.getLatitude() && locations.get(locations.size() - 1).getLongitude() != location.getLongitude()) {
+                        if (locations.size() != 0 && round(locations.get(locations.size() - 1).getLatitude(),5) != round(location.getLatitude(),5) && round(locations.get(locations.size() - 1).getLongitude(),5) != round(location.getLongitude(),5)) {
                             Location l = new Location("Location");
-                            l.setLatitude(location.getLatitude());
-                            l.setLongitude(location.getLongitude());
+                            l.setLatitude(round(location.getLatitude(),5));
+                            l.setLongitude(round(location.getLongitude(),5));
                             l.setTime(location.getTime());
                             endTime = System.currentTimeMillis();
                             locations.add(l);
+
+                            // Constantly check the distance between two last locations and add it to the total distance variable.
+                            if(locations.size() >= 2) {
+                                distanceTravelled += locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1));
+
+                                speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
+                                // m / ms
+                                speedms = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()));
+                            }
+
                         }
-                        // Constantly check the distance between two last locations and add it to the total distance variable.
-                        if(locations.size() >= 2) {
-                            distanceTravelled += locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1));
 
-                            speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
-                            // m / ms
-                            speedms = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()));
-
-                           // System.out.println(speed);
-                             System.out.println(speed);
-                        }
-
-                        System.out.println("Current Location: " + location.getLatitude() + " " + location.getLongitude());
-                        System.out.println("Last Array Location: " + locations.get(locations.size() - 1).getLatitude() + " " + locations.get(locations.size() - 1).getLongitude());
+                        System.out.println("Current Location: " + round(location.getLatitude(),5) + " " + round(location.getLongitude(),5));
+                        System.out.println("Last Array Location: " + round(locations.get(locations.size() - 1).getLatitude(),5) + " " + round(locations.get(locations.size() - 1).getLongitude(),5));
+                        System.out.println("Speed in kmh: " + speed);
                     }
-                 //  System.out.println("Longitude callback: " + location.getLongitude());
-                   // System.out.println("Latitude callback: " + location.getLatitude());
-                   // System.out.println("LocationResults.getLocations() length: " + locationResult.getLocations().size());
-                    // System.out.println(locations.size());
+
                     System.out.println(locations.size());
                     isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
 
@@ -179,6 +168,14 @@ public class WaterAPI extends AppCompatActivity {
         } else {
             status.setText("Unable to retrieve location!");
         }
+    }
+
+    private static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
 }
