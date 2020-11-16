@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">OnWaterTest</string>
     <string name="ElapsedTime">Elapsed Time:</string>
+    <string name="Speed">"Speed: "</string>
+    <string name="speed">Speed:</string>
+    <string name="Distance">Distance:</string>
 </resources>
