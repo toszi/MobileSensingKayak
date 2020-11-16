@@ -43,7 +43,11 @@ public class WaterAPI extends AppCompatActivity {
     JSONObject responseObject;
     FusedLocationProviderClient mLocationProvider;
     ArrayList<Location> locations = new ArrayList<Location>();
-
+    Long startTime = System.currentTimeMillis();
+    Long endTime;
+    Double distanceTravelled = 0.0;
+    float speed;
+    float speedms;
     private LocationCallback locationCallback;
 
     public WaterAPI(Context context) {
@@ -66,6 +70,7 @@ public class WaterAPI extends AppCompatActivity {
         LocationCallback mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+
                 if (locationResult == null) {
                     return;
                 }
@@ -75,6 +80,7 @@ public class WaterAPI extends AppCompatActivity {
                             Location l = new Location("Location");
                             l.setLatitude(location.getLatitude());
                             l.setLongitude(location.getLongitude());
+                            l.setTime(location.getTime());
                             locations.add(l);
                         }
                         // if locations array size is not 0 and the previous location is not the same, then we add it to the array.
@@ -82,8 +88,22 @@ public class WaterAPI extends AppCompatActivity {
                             Location l = new Location("Location");
                             l.setLatitude(location.getLatitude());
                             l.setLongitude(location.getLongitude());
+                            l.setTime(location.getTime());
+                            endTime = System.currentTimeMillis();
                             locations.add(l);
                         }
+                        // Constantly check the distance between two last locations and add it to the total distance variable.
+                        if(locations.size() >= 2) {
+                            distanceTravelled += locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1));
+
+                            speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
+                            // m / ms
+                            speedms = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()));
+
+                           // System.out.println(speed);
+                             System.out.println(speed);
+                        }
+
                         System.out.println("Current Location: " + location.getLatitude() + " " + location.getLongitude());
                         System.out.println("Last Array Location: " + locations.get(locations.size() - 1).getLatitude() + " " + locations.get(locations.size() - 1).getLongitude());
                     }
@@ -133,9 +153,9 @@ public class WaterAPI extends AppCompatActivity {
                             }
                             try {
                                 if (responseObject.getString("water").equals("true")) {
-                                    status.setText("Response is: You are on water!");
+                                    status.setText("Status: You are on water!" +  "\nDistance Travelled(m): " + distanceTravelled + "\n Current Speed(m/s): " + speed);
                                 } else if (responseObject.getString("water").equals("false")) {
-                                    status.setText("Response is: You are not on water!");
+                                    status.setText("Status: You are not water!" +  "\nDistance Travelled(m): " + distanceTravelled + "\n Current Speed(m/s): " + speed);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
