@@ -5,9 +5,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.BatteryManager;
+import android.os.Build;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -30,6 +33,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class WaterAPI extends AppCompatActivity {
     Context c;
     JSONObject responseObject;
@@ -39,6 +43,8 @@ public class WaterAPI extends AppCompatActivity {
     Long endTime;
     Long timeElapsed;
     Double distanceTravelled = 0.0;
+    BatteryManager batteryManager;
+    int batteryLevel;
     float speed;
     float speedms;
     private LocationCallback locationCallback;
@@ -47,7 +53,9 @@ public class WaterAPI extends AppCompatActivity {
         this.c = context;
     }
 
-    public void onWater(TextView status, TextView elapsedTime) {
+    public void onWater(TextView status, TextView elapsedTime, BatteryManager batteryManager) {
+        this.batteryManager = batteryManager;
+        batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
         startTime = System.currentTimeMillis();
         // Use current location.
         mLocationProvider = LocationServices.getFusedLocationProviderClient((Activity)this.c);
@@ -69,6 +77,7 @@ public class WaterAPI extends AppCompatActivity {
                 endTime = System.currentTimeMillis();
                 timeElapsed = (endTime - startTime) / 1000;
                 elapsedTime.setText(timeElapsed.toString() + " Seconds");
+                batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
                 if (locationResult == null) {
                     return;
                 }
@@ -94,10 +103,8 @@ public class WaterAPI extends AppCompatActivity {
                             // Constantly check the distance between two last locations and add it to the total distance variable.
                             if(locations.size() >= 2) {
                                 distanceTravelled += locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1));
-
+                                // km/h
                                 speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
-                                // m / ms
-                                speedms = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()));
                             }
 
                         }
@@ -106,10 +113,13 @@ public class WaterAPI extends AppCompatActivity {
                         System.out.println("Last Array Location: " + round(locations.get(locations.size() - 1).getLatitude(),5) + " " + round(locations.get(locations.size() - 1).getLongitude(),5));
                         System.out.println("Speed in kmh: " + speed);
                     }
-
+                    System.out.println(batteryLevel);
                     System.out.println(locations.size());
-                    isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
-
+                    // Here we implement the tactic of dynamic duty cycling.
+                    // If the phone falls below 20% battery we do not use the API anymore and we rely on the GPS.
+                    if(batteryLevel >= 20) {
+                        isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                    }
                 }
             }
         };
