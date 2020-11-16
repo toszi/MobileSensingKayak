@@ -63,9 +63,12 @@ public class WaterAPI extends AppCompatActivity {
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         //Make a request for the location manager
         LocationCallback mLocationCallback = new LocationCallback() {
+
             @Override
             public void onLocationResult(LocationResult locationResult) {
-
+                endTime = System.currentTimeMillis();
+                timeElapsed = (endTime - startTime) / 1000;
+                elapsedTime.setText(timeElapsed.toString() + " Seconds");
                 if (locationResult == null) {
                     return;
                 }
@@ -86,9 +89,6 @@ public class WaterAPI extends AppCompatActivity {
                             l.setLatitude(round(location.getLatitude(),5));
                             l.setLongitude(round(location.getLongitude(),5));
                             l.setTime(location.getTime());
-                            endTime = System.currentTimeMillis();
-                            timeElapsed = (endTime - startTime) / 1000;
-                            elapsedTime.setText(timeElapsed.toString() + " Seconds");
                             locations.add(l);
 
                             // Constantly check the distance between two last locations and add it to the total distance variable.
