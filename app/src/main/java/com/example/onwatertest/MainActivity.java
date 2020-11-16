@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         waterButton = (Button) findViewById(R.id.waterButton);
-        waterStatus = (TextView) findViewById(R.id.waterStatus);
+        waterStatus = (TextView) findViewById(R.id.trackingStatus);
         latText = (EditText) findViewById(R.id.latitudeInput);
         longText = (EditText) findViewById(R.id.longtitudeInput);
         w = new WaterAPI(this);

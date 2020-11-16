@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">OnWaterTest</string>
+    <string name="ElapsedTime">Elapsed Time:</string>
 </resources>
