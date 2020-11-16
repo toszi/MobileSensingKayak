@@ -35,8 +35,9 @@ public class WaterAPI extends AppCompatActivity {
     JSONObject responseObject;
     FusedLocationProviderClient mLocationProvider;
     ArrayList<Location> locations = new ArrayList<Location>();
-    Long startTime = System.currentTimeMillis();
+    Long startTime;
     Long endTime;
+    Long timeElapsed;
     Double distanceTravelled = 0.0;
     float speed;
     float speedms;
@@ -46,7 +47,8 @@ public class WaterAPI extends AppCompatActivity {
         this.c = context;
     }
 
-    public void onWater(TextView status, EditText latInput, EditText longInput) {
+    public void onWater(TextView status, TextView elapsedTime) {
+        startTime = System.currentTimeMillis();
         // Use current location.
         mLocationProvider = LocationServices.getFusedLocationProviderClient((Activity)this.c);
         if(ActivityCompat.checkSelfPermission(this.c, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -85,6 +87,8 @@ public class WaterAPI extends AppCompatActivity {
                             l.setLongitude(round(location.getLongitude(),5));
                             l.setTime(location.getTime());
                             endTime = System.currentTimeMillis();
+                            timeElapsed = (endTime - startTime) / 1000;
+                            elapsedTime.setText(timeElapsed.toString() + " Seconds");
                             locations.add(l);
 
                             // Constantly check the distance between two last locations and add it to the total distance variable.

@@ -11,8 +11,7 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
     Button waterButton;
     TextView waterStatus;
-    EditText latText;
-    EditText longText;
+    TextView elapsedTime;
     WaterAPI w;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,13 +19,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         waterButton = (Button) findViewById(R.id.waterButton);
         waterStatus = (TextView) findViewById(R.id.trackingStatus);
-        latText = (EditText) findViewById(R.id.latitudeInput);
-        longText = (EditText) findViewById(R.id.longtitudeInput);
+        elapsedTime = (TextView) findViewById(R.id.elapsedTime);
         w = new WaterAPI(this);
     }
 
     public void clickButton(View view) {
-        w.onWater(this.waterStatus, this.latText, this.longText);
+        w.onWater(this.waterStatus, this.elapsedTime);
     }
 
 
