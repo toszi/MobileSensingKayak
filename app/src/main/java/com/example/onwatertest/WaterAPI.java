@@ -53,7 +53,7 @@ public class WaterAPI extends AppCompatActivity {
         this.c = context;
     }
 
-    public void onWater(TextView status, TextView elapsedTime, BatteryManager batteryManager) {
+    public void onWater(TextView status, TextView elapsedTime, TextView speedo, TextView distance, BatteryManager batteryManager) {
         this.batteryManager = batteryManager;
         batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
         startTime = System.currentTimeMillis();
@@ -76,7 +76,9 @@ public class WaterAPI extends AppCompatActivity {
             public void onLocationResult(LocationResult locationResult) {
                 endTime = System.currentTimeMillis();
                 timeElapsed = (endTime - startTime) / 1000;
-                elapsedTime.setText(timeElapsed.toString() + " Seconds");
+                elapsedTime.setText(timeElapsed.toString() + " seconds");
+                speedo.setText((int) speed + " km/h");
+                distance.setText(round(distanceTravelled,0) + " meters");
                 batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
                 if (locationResult == null) {
                     return;
@@ -159,9 +161,9 @@ public class WaterAPI extends AppCompatActivity {
                             }
                             try {
                                 if (responseObject.getString("water").equals("true")) {
-                                    status.setText("Status: You are on water!" +  "\nDistance Travelled(m): " + distanceTravelled + "\n Current Speed(m/s): " + speed);
+                                    status.setText("Status: You are on water!" /*+  "\nDistance Travelled(m): " + distanceTravelled + "\n Current Speed(m/s): " + speed*/);
                                 } else if (responseObject.getString("water").equals("false")) {
-                                    status.setText("Status: You are not water!" +  "\nDistance Travelled(m): " + distanceTravelled + "\n Current Speed(m/s): " + speed);
+                                    status.setText("Status: You are not water!" /*+  "\nDistance Travelled(m): " + distanceTravelled + "\n Current Speed(m/s): " + speed*/);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
