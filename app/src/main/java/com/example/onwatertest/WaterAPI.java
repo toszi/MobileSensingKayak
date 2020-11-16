@@ -109,6 +109,9 @@ public class WaterAPI extends AppCompatActivity {
                                 speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
                             }
 
+                            // If the position is the same as the previous one, we set the speed to 0.
+                        } else if(round(locations.get(locations.size() - 1).getLatitude(),5) == round(location.getLatitude(),5) && round(locations.get(locations.size() - 1).getLongitude(),5) == round(location.getLongitude(),5)) {
+                            speed = 0;
                         }
 
                         System.out.println("Current Location: " + round(location.getLatitude(),5) + " " + round(location.getLongitude(),5));
