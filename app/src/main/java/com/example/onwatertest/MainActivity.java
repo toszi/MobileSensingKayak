@@ -26,12 +26,14 @@ public class MainActivity extends AppCompatActivity {
     TextView elapsedTime;
     TextView speed;
     TextView distance;
-    int seconds;
 
     // Functionality elements
     BatteryManager batteryManager;
     WaterAPI w;
     private static boolean isActivityRunning = false;
+    int seconds;
+    boolean runTimer;
+    Timer timer;
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -61,26 +63,32 @@ public class MainActivity extends AppCompatActivity {
             isActivityRunning = false;
             activityButton.setText("Start Tracking");
             Toast.makeText(this, "Activity stopped", Toast.LENGTH_LONG).show();
+            runTimer = false;
             seconds = 0;
         } else {
             isActivityRunning = true;
             activityButton.setText("Stop Tracking");
             Toast.makeText(this, "Happy kayaking!", Toast.LENGTH_LONG).show();
+            runTimer = true;
             updateElapsedTime();
         }
 
     }
 
     private void updateElapsedTime(){
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        elapsedTime.setText(seconds + " seconds");
-                        seconds++;
+                        if(runTimer){
+                            elapsedTime.setText(seconds + " seconds");
+                            seconds++;
+                        }else{
+                            timer.cancel();
+                        }
                     }
                 });
             }
@@ -90,8 +98,4 @@ public class MainActivity extends AppCompatActivity {
     public static boolean getIsActivityRunning(){
         return isActivityRunning;
     }
-
-
-
-
 }

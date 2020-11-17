@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -35,18 +36,17 @@ import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class WaterAPI extends AppCompatActivity {
+    private static final String TAG = "WaterAPI";
+
     Context c;
     JSONObject responseObject;
     FusedLocationProviderClient mLocationProvider;
     ArrayList<Location> locations = new ArrayList<Location>();
     Long startTime;
-    Long endTime;
-    Long timeElapsed;
     Double distanceTravelled = 0.0;
     BatteryManager batteryManager;
     int batteryLevel;
     float speed;
-    private LocationCallback locationCallback;
     boolean makeAPICall;
 
     public WaterAPI(Context context) {
@@ -67,16 +67,12 @@ public class WaterAPI extends AppCompatActivity {
 
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(5000);
-        mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         //Make a request for the location manager
         LocationCallback mLocationCallback = new LocationCallback() {
-
-
             @SuppressLint("SetTextI18n")
             @Override
             public void onLocationResult(LocationResult locationResult) {
-
                 if (MainActivity.getIsActivityRunning()) {
                     speedo.setText((int) speed + " km/h");
                     distance.setText(round(distanceTravelled, 0) + " meters");
@@ -109,8 +105,7 @@ public class WaterAPI extends AppCompatActivity {
                                     // km/h
                                     speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
                                 }
-
-                                // If the position is the same as the previous one, we set the speed to 0.
+                              // If the position is the same as the previous one, we set the speed to 0.
                             } else if (round(locations.get(locations.size() - 1).getLatitude(), 5) == round(location.getLatitude(), 5) && round(locations.get(locations.size() - 1).getLongitude(), 5) == round(location.getLongitude(), 5)) {
                                 speed = 0;
                             }
@@ -122,29 +117,16 @@ public class WaterAPI extends AppCompatActivity {
                         System.out.println(batteryLevel);
                         System.out.println(locations.size());
 
-                        setCallAPIboolean(speed);
                         // Here we implement the tactic of dynamic duty cycling.
                         // If the phone falls below 20% battery we do not use the API anymore and we rely on the GPS.
-                        if (batteryLevel >= 20 && makeAPICall) {
+                        if (batteryLevel > 20 && makeAPICall) {
                             isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
                         }
-
-
                     }
                 }
             }
         };
-
         mLocationProvider.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-    }
-
-    private void setCallAPIboolean(float speed){
-        if(speed >= 1){
-            this.makeAPICall = true;
-        } else{
-            this.makeAPICall = false;
-        }
-
     }
 
     private void isOnWaterRequest(TextView status, Double longitude, Double latitude){
@@ -166,9 +148,9 @@ public class WaterAPI extends AppCompatActivity {
                             }
                             try {
                                 if (responseObject.getString("water").equals("true")) {
-                                    status.setText("Status: You are on water!" /*+  "\nDistance Travelled(m): " + distanceTravelled + "\n Current Speed(m/s): " + speed*/);
+                                    status.setText("Status: You are on water!");
                                 } else if (responseObject.getString("water").equals("false")) {
-                                    status.setText("Status: You are not water!" /*+  "\nDistance Travelled(m): " + distanceTravelled + "\n Current Speed(m/s): " + speed*/);
+                                    status.setText("Status: You are not water!");
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
