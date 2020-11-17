@@ -1,13 +1,13 @@
 package com.example.onwatertest;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Build;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -46,8 +46,8 @@ public class WaterAPI extends AppCompatActivity {
     BatteryManager batteryManager;
     int batteryLevel;
     float speed;
-    float speedms;
     private LocationCallback locationCallback;
+    boolean makeAPICall;
 
     public WaterAPI(Context context) {
         this.c = context;
@@ -72,58 +72,67 @@ public class WaterAPI extends AppCompatActivity {
         //Make a request for the location manager
         LocationCallback mLocationCallback = new LocationCallback() {
 
+
+            @SuppressLint("SetTextI18n")
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                endTime = System.currentTimeMillis();
-                timeElapsed = (endTime - startTime) / 1000;
-                elapsedTime.setText(timeElapsed.toString() + " seconds");
-                speedo.setText((int) speed + " km/h");
-                distance.setText(round(distanceTravelled,0) + " meters");
-                batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-                if (locationResult == null) {
-                    return;
-                }
-                //size of locationResults.getLocations() will always be 1
-                for (Location location : locationResult.getLocations()) {
-                    if (location != null) {
-                        //if the app has just been started, add the current location to the arraylist
-                        if(locations.size() == 0) {
-                            Location l = new Location("Location");
-                            l.setLatitude(round(location.getLatitude(), 5));
-                            l.setLongitude(round(location.getLongitude(),5));
-                            l.setTime(location.getTime());
-                            locations.add(l);
-                        }
-                        // if locations array size is not 0 and the previous location is not the same, then we add it to the array.
-                        if (locations.size() != 0 && round(locations.get(locations.size() - 1).getLatitude(),5) != round(location.getLatitude(),5) && round(locations.get(locations.size() - 1).getLongitude(),5) != round(location.getLongitude(),5)) {
-                            Location l = new Location("Location");
-                            l.setLatitude(round(location.getLatitude(),5));
-                            l.setLongitude(round(location.getLongitude(),5));
-                            l.setTime(location.getTime());
-                            locations.add(l);
 
-                            // Constantly check the distance between two last locations and add it to the total distance variable.
-                            if(locations.size() >= 2) {
-                                distanceTravelled += locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1));
-                                // km/h
-                                speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
+                if (MainActivity.getIsActivityRunning()) {
+                    endTime = System.currentTimeMillis();
+                    timeElapsed = (endTime - startTime) / 1000;
+                    elapsedTime.setText(timeElapsed.toString() + " seconds");
+                    speedo.setText((int) speed + " km/h");
+                    distance.setText(round(distanceTravelled, 0) + " meters");
+                    batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                    if (locationResult == null) {
+                        return;
+                    }
+                    //size of locationResults.getLocations() will always be 1
+                    for (Location location : locationResult.getLocations()) {
+                        if (location != null) {
+                            //if the app has just been started, add the current location to the arraylist
+                            if (locations.size() == 0) {
+                                Location l = new Location("Location");
+                                l.setLatitude(round(location.getLatitude(), 5));
+                                l.setLongitude(round(location.getLongitude(), 5));
+                                l.setTime(location.getTime());
+                                locations.add(l);
+                            }
+                            // if locations array size is not 0 and the previous location is not the same, then we add it to the array.
+                            if (locations.size() != 0 && round(locations.get(locations.size() - 1).getLatitude(), 5) != round(location.getLatitude(), 5) && round(locations.get(locations.size() - 1).getLongitude(), 5) != round(location.getLongitude(), 5)) {
+                                Location l = new Location("Location");
+                                l.setLatitude(round(location.getLatitude(), 5));
+                                l.setLongitude(round(location.getLongitude(), 5));
+                                l.setTime(location.getTime());
+                                locations.add(l);
+
+                                // Constantly check the distance between two last locations and add it to the total distance variable.
+                                if (locations.size() >= 2) {
+                                    distanceTravelled += locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1));
+                                    // km/h
+                                    speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
+                                }
+
+                                // If the position is the same as the previous one, we set the speed to 0.
+                            } else if (round(locations.get(locations.size() - 1).getLatitude(), 5) == round(location.getLatitude(), 5) && round(locations.get(locations.size() - 1).getLongitude(), 5) == round(location.getLongitude(), 5)) {
+                                speed = 0;
                             }
 
-                            // If the position is the same as the previous one, we set the speed to 0.
-                        } else if(round(locations.get(locations.size() - 1).getLatitude(),5) == round(location.getLatitude(),5) && round(locations.get(locations.size() - 1).getLongitude(),5) == round(location.getLongitude(),5)) {
-                            speed = 0;
+                            System.out.println("Current Location: " + round(location.getLatitude(), 5) + " " + round(location.getLongitude(), 5));
+                            System.out.println("Last Array Location: " + round(locations.get(locations.size() - 1).getLatitude(), 5) + " " + round(locations.get(locations.size() - 1).getLongitude(), 5));
+                            System.out.println("Speed in kmh: " + speed);
+                        }
+                        System.out.println(batteryLevel);
+                        System.out.println(locations.size());
+
+                        setCallAPIboolean(speed);
+                        // Here we implement the tactic of dynamic duty cycling.
+                        // If the phone falls below 20% battery we do not use the API anymore and we rely on the GPS.
+                        if (batteryLevel >= 20 && makeAPICall) {
+                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
                         }
 
-                        System.out.println("Current Location: " + round(location.getLatitude(),5) + " " + round(location.getLongitude(),5));
-                        System.out.println("Last Array Location: " + round(locations.get(locations.size() - 1).getLatitude(),5) + " " + round(locations.get(locations.size() - 1).getLongitude(),5));
-                        System.out.println("Speed in kmh: " + speed);
-                    }
-                    System.out.println(batteryLevel);
-                    System.out.println(locations.size());
-                    // Here we implement the tactic of dynamic duty cycling.
-                    // If the phone falls below 20% battery we do not use the API anymore and we rely on the GPS.
-                    if(batteryLevel >= 20) {
-                        isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+
                     }
                 }
             }
@@ -146,6 +155,15 @@ public class WaterAPI extends AppCompatActivity {
         */
     }
 
+    private void setCallAPIboolean(float speed){
+        if(speed >= 1){
+            this.makeAPICall = true;
+        } else{
+            this.makeAPICall = false;
+        }
+
+    }
+
     private void isOnWaterRequest(TextView status, Double longitude, Double latitude){
         RequestQueue queue = Volley.newRequestQueue(this.c);
         String url = "";
@@ -154,6 +172,7 @@ public class WaterAPI extends AppCompatActivity {
             // Request a string response from the provided URL.
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
+                        @SuppressLint("SetTextI18n")
                         @Override
                         public void onResponse(String response) {
                             // Display the first 500 characters of the response string.
@@ -173,6 +192,7 @@ public class WaterAPI extends AppCompatActivity {
                             }
                         }
                     }, new Response.ErrorListener() {
+                @SuppressLint("SetTextI18n")
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     status.setText("That didn't work!");

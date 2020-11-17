@@ -7,9 +7,11 @@ import android.content.Context;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +25,10 @@ public class MainActivity extends AppCompatActivity {
     // Functionality elements
     BatteryManager batteryManager;
     WaterAPI w;
+    private static boolean isActivityRunning = false;
+
+    Runnable updateElapsedTime;
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -40,12 +46,29 @@ public class MainActivity extends AppCompatActivity {
         // Functionality elements
         batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
         w = new WaterAPI(this);
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void clickButton(View view) {
         w.onWater(this.activityStatus, this.elapsedTime, this.speed, this.distance, this.batteryManager);
+        if (isActivityRunning){
+            isActivityRunning = false;
+            activityButton.setText("Start Tracking");
+            Toast.makeText(this, "Activity stopped", Toast.LENGTH_LONG).show();
+
+        } else {
+            isActivityRunning = true;
+            activityButton.setText("Stop Tracking");
+            Toast.makeText(this, "Happy kayaking!", Toast.LENGTH_LONG).show();
+        }
+
     }
+
+    public static boolean getIsActivityRunning(){
+        return isActivityRunning;
+    }
+
 
 
 
