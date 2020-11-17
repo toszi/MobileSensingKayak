@@ -47,7 +47,6 @@ public class WaterAPI extends AppCompatActivity {
     BatteryManager batteryManager;
     int batteryLevel;
     float speed;
-    boolean makeAPICall;
 
     public WaterAPI(Context context) {
         this.c = context;
@@ -119,7 +118,16 @@ public class WaterAPI extends AppCompatActivity {
 
                         // Here we implement the tactic of dynamic duty cycling.
                         // If the phone falls below 20% battery we do not use the API anymore and we rely on the GPS.
-                        if (batteryLevel > 20 && makeAPICall) {
+                        if (batteryLevel > 20) {
+                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                        }
+
+                        //speed thresholds. TODO: put it in the correct spot as well as functionality
+                        if(speed >= 2 && speed <= 10){
+                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                        }else if(speed < 2){
+                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                        }else if(speed > 10){
                             isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
                         }
                     }
