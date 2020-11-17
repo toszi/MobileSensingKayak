@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -156,8 +157,12 @@ public class WaterAPI extends AppCompatActivity {
                             }
                             try {
                                 if (responseObject.getString("water").equals("true")) {
+                                    status.setBackgroundColor(Color.BLACK);
+                                    status.setTextColor(Color.WHITE);
                                     status.setText("Status: You are on water!");
                                 } else if (responseObject.getString("water").equals("false")) {
+                                    status.setBackgroundColor(Color.BLACK);
+                                    status.setTextColor(Color.WHITE);
                                     status.setText("Status: You are not water!");
                                 }
                             } catch (JSONException e) {
