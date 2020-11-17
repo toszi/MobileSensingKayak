@@ -8,12 +8,17 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
 
     // UI elements
     Button activityButton;
@@ -21,13 +26,12 @@ public class MainActivity extends AppCompatActivity {
     TextView elapsedTime;
     TextView speed;
     TextView distance;
+    int seconds;
 
     // Functionality elements
     BatteryManager batteryManager;
     WaterAPI w;
     private static boolean isActivityRunning = false;
-
-    Runnable updateElapsedTime;
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -47,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
         w = new WaterAPI(this);
 
+        seconds = 0;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -56,13 +61,30 @@ public class MainActivity extends AppCompatActivity {
             isActivityRunning = false;
             activityButton.setText("Start Tracking");
             Toast.makeText(this, "Activity stopped", Toast.LENGTH_LONG).show();
-
+            seconds = 0;
         } else {
             isActivityRunning = true;
             activityButton.setText("Stop Tracking");
             Toast.makeText(this, "Happy kayaking!", Toast.LENGTH_LONG).show();
+            updateElapsedTime();
         }
 
+    }
+
+    private void updateElapsedTime(){
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        elapsedTime.setText(seconds + " seconds");
+                        seconds++;
+                    }
+                });
+            }
+        },0,1000);//Update text every second
     }
 
     public static boolean getIsActivityRunning(){

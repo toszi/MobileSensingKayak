@@ -78,9 +78,6 @@ public class WaterAPI extends AppCompatActivity {
             public void onLocationResult(LocationResult locationResult) {
 
                 if (MainActivity.getIsActivityRunning()) {
-                    endTime = System.currentTimeMillis();
-                    timeElapsed = (endTime - startTime) / 1000;
-                    elapsedTime.setText(timeElapsed.toString() + " seconds");
                     speedo.setText((int) speed + " km/h");
                     distance.setText(round(distanceTravelled, 0) + " meters");
                     batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
@@ -139,20 +136,6 @@ public class WaterAPI extends AppCompatActivity {
         };
 
         mLocationProvider.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-        /*
-        mLocationProvider.getLastLocation().addOnSuccessListener((Activity) this.c, location -> {
-            if(location != null) {
-                //this.latitude = location.getLatitude();
-                //this.longitude = location.getLongitude();
-              //  System.out.println(latitude);
-               // System.out.println(longitude);
-                System.out.println("mLocationProvider addOnSuccessListener");
-            }
-
-        }).addOnFailureListener(e -> {
-            System.out.println("Failed to retrieve location!");
-        });
-        */
     }
 
     private void setCallAPIboolean(float speed){
