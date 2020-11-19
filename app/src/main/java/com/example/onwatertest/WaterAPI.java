@@ -67,6 +67,7 @@ public class WaterAPI extends AppCompatActivity {
 
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(5000);
+        mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         //Make a request for the location manager
         LocationCallback mLocationCallback = new LocationCallback() {
@@ -132,6 +133,9 @@ public class WaterAPI extends AppCompatActivity {
                             isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
                         }
                     }
+                } else {
+                    distanceTravelled = 0.0;
+                    speed = 0;
                 }
             }
         };

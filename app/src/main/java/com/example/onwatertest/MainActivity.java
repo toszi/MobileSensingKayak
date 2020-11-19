@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Activity stopped", Toast.LENGTH_LONG).show();
             runTimer = false;
             seconds = 0;
+            speed.setText(0 + " km/h");
+            distance.setText(0 + " meters");
         } else {
             isActivityRunning = true;
             activityButton.setText("Stop Tracking");
