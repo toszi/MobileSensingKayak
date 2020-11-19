@@ -58,10 +58,10 @@ public class WaterAPI extends AppCompatActivity {
         batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
         startTime = System.currentTimeMillis();
         // Use current location.
-        mLocationProvider = LocationServices.getFusedLocationProviderClient((Activity)this.c);
-        if(ActivityCompat.checkSelfPermission(this.c, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        mLocationProvider = LocationServices.getFusedLocationProviderClient((Activity) this.c);
+        if (ActivityCompat.checkSelfPermission(this.c, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this.c, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity)this.c, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+            ActivityCompat.requestPermissions((Activity) this.c, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     1000);
         }
 
@@ -106,7 +106,7 @@ public class WaterAPI extends AppCompatActivity {
                                     // km/h
                                     speed = (locations.get(locations.size() - 2).distanceTo(locations.get(locations.size() - 1)) / (locations.get(locations.size() - 1).getTime() - locations.get(locations.size() - 2).getTime()) * 3600);
                                 }
-                              // If the position is the same as the previous one, we set the speed to 0.
+                                // If the position is the same as the previous one, we set the speed to 0.
                             } else if (round(locations.get(locations.size() - 1).getLatitude(), 5) == round(location.getLatitude(), 5) && round(locations.get(locations.size() - 1).getLongitude(), 5) == round(location.getLongitude(), 5)) {
                                 speed = 0;
                             }
@@ -120,17 +120,32 @@ public class WaterAPI extends AppCompatActivity {
 
                         // Here we implement the tactic of dynamic duty cycling.
                         // If the phone falls below 20% battery we do not use the API anymore and we rely on the GPS.
-                        if (batteryLevel > 20) {
-                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
-                        }
 
-                        //speed thresholds. TODO: put it in the correct spot as well as functionality
-                        if(speed >= 2 && speed <= 10){
-                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
-                        }else if(speed < 2){
-                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
-                        }else if(speed > 10){
-                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                        // Speed thresholds.
+                        if (batteryLevel > 20) {
+                            // If speed is unlikely kayakspeed, make sure you are still on water
+
+                            if (speed >= 0 && speed <= 2) {
+                                isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                            } else if (speed > 12) {
+                                isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                            } else {
+                                status.setText("");
+
+                            }
+
+                            // Sets GPS call interval to every 5 sec if battery is > 20
+                            if (mLocationRequest.getFastestInterval() != 5000 && mLocationRequest.getInterval() != 5000)
+                                mLocationRequest.setInterval(5000);
+                            mLocationRequest.setFastestInterval(5000);
+
+                            // Sets GPS call interval to every 10 sec if battery is <= 20
+                        } else {
+                            if (mLocationRequest.getFastestInterval() != 10000 && mLocationRequest.getInterval() != 10000) {
+                                mLocationRequest.setInterval(10000);
+                                mLocationRequest.setFastestInterval(10000);
+                            }
+
                         }
                     }
                 } else {
@@ -142,10 +157,10 @@ public class WaterAPI extends AppCompatActivity {
         mLocationProvider.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
     }
 
-    private void isOnWaterRequest(TextView status, Double longitude, Double latitude){
+    private void isOnWaterRequest(TextView status, Double longitude, Double latitude) {
         RequestQueue queue = Volley.newRequestQueue(this.c);
         String url = "";
-        if(longitude != null && latitude != null) {
+        if (longitude != null && latitude != null) {
             url = "https://api.onwater.io/api/v1/results/" + latitude.toString() + "," + longitude.toString() + "?access_token=kZPaDPUNtsx_oTz6y8Mg";
             // Request a string response from the provided URL.
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -174,6 +189,7 @@ public class WaterAPI extends AppCompatActivity {
                                     speed = 0;
 
                                 }
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
