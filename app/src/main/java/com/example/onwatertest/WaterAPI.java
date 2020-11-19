@@ -164,10 +164,15 @@ public class WaterAPI extends AppCompatActivity {
                                     status.setBackgroundColor(Color.BLACK);
                                     status.setTextColor(Color.WHITE);
                                     status.setText("Status: You are on water!");
+                                    MainActivity.setIsActivityRunning(true);
                                 } else if (responseObject.getString("water").equals("false")) {
                                     status.setBackgroundColor(Color.BLACK);
                                     status.setTextColor(Color.WHITE);
                                     status.setText("Status: You are not water!");
+                                    MainActivity.setIsActivityRunning(false);
+                                    distanceTravelled = 0.0;
+                                    speed = 0;
+
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -181,7 +186,6 @@ public class WaterAPI extends AppCompatActivity {
                     System.out.println(latitude);
                     System.out.println(longitude);
                 }
-
             });
 
             // Add the request to the RequestQueue.

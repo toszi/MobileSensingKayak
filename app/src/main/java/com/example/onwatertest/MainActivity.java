@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     BatteryManager batteryManager;
     WaterAPI w;
     private static boolean isActivityRunning = false;
+    private static boolean isOnWater = false;
     int seconds;
     boolean runTimer;
     Timer timer;
@@ -74,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
             runTimer = true;
             updateElapsedTime();
         }
-
     }
 
     private void updateElapsedTime(){
@@ -85,6 +85,14 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        // Check if activity is running and if we are not on water we stop it in the WaterAPI class.
+                        if(!isActivityRunning) {
+                            activityButton.setText("Start Tracking");
+                            runTimer = false;
+                            seconds = 0;
+                            speed.setText(0 + " km/h");
+                            distance.setText(0 + " meters");
+                        }
                         if(runTimer){
                             elapsedTime.setText(seconds + " seconds");
                             seconds++;
@@ -99,5 +107,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static boolean getIsActivityRunning(){
         return isActivityRunning;
+    }
+    public static void setIsActivityRunning(boolean activityRunning){
+        isActivityRunning = activityRunning;
     }
 }
