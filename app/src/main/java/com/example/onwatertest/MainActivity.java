@@ -7,8 +7,6 @@ import android.content.Context;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -29,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Functionality elements
     BatteryManager batteryManager;
-    WaterAPI w;
+    Backend w;
     private static boolean isActivityRunning = false;
     private static boolean isOnWater = false;
     int seconds;
@@ -52,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Functionality elements
         batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
-        w = new WaterAPI(this);
+        w = new Backend(this);
 
         seconds = 0;
     }

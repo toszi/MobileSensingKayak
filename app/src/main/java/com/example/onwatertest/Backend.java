@@ -36,7 +36,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class WaterAPI extends AppCompatActivity {
+public class Backend extends AppCompatActivity {
     private static final String TAG = "WaterAPI";
 
     Context c;
@@ -49,7 +49,7 @@ public class WaterAPI extends AppCompatActivity {
     int batteryLevel;
     float speed;
 
-    public WaterAPI(Context context) {
+    public Backend(Context context) {
         this.c = context;
     }
 
