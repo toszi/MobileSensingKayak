@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -111,29 +112,26 @@ public class Backend extends AppCompatActivity {
                                 speed = 0;
                             }
 
-                            System.out.println("Current Location: " + round(location.getLatitude(), 5) + " " + round(location.getLongitude(), 5));
-                            System.out.println("Last Array Location: " + round(locations.get(locations.size() - 1).getLatitude(), 5) + " " + round(locations.get(locations.size() - 1).getLongitude(), 5));
+                            // System.out.println("Current Location: " + round(location.getLatitude(), 5) + " " + round(location.getLongitude(), 5));
+                            //  System.out.println("Last Array Location: " + round(locations.get(locations.size() - 1).getLatitude(), 5) + " " + round(locations.get(locations.size() - 1).getLongitude(), 5));
                             System.out.println("Speed in kmh: " + speed);
                         }
-                        System.out.println(batteryLevel);
-                        System.out.println(locations.size());
+                        // System.out.println(batteryLevel);
+                        // System.out.println(locations.size());
 
-                        // Here we implement the tactic of dynamic duty cycling.
-                        // If the phone falls below 20% battery we do not use the API anymore and we rely on the GPS.
+                        // Dynamic Duty Cycling
+                        if (speed >= 0 && speed <= 2) {
+                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                        } else if (speed > 12) {
+                            isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
+                        } else {
+                            status.setText("");
+                        }
 
+                        // Resource adaptability
                         // Speed thresholds.
                         if (batteryLevel > 20) {
                             // If speed is unlikely kayakspeed, make sure you are still on water
-
-                            if (speed >= 0 && speed <= 2) {
-                                isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
-                            } else if (speed > 12) {
-                                isOnWaterRequest(status, location.getLongitude(), location.getLatitude());
-                            } else {
-                                status.setText("");
-
-                            }
-
                             // Sets GPS call interval to every 5 sec if battery is > 20
                             if (mLocationRequest.getFastestInterval() != 5000 && mLocationRequest.getInterval() != 5000)
                                 mLocationRequest.setInterval(5000);
@@ -199,8 +197,8 @@ public class Backend extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     status.setText("That didn't work!");
-                    System.out.println(latitude);
-                    System.out.println(longitude);
+                    //  System.out.println(latitude);
+                    // System.out.println(longitude);
                 }
             });
 
